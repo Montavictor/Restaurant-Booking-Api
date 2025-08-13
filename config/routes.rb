@@ -14,7 +14,12 @@ Rails.application.routes.draw do
                  }
 
       # other routes...
-
+      resources :booking_dates, only: [:index, :show, :create, :update, :destroy] 
+      resources :reservation_infos, only: [:index, :show, :create, :update, :destroy]
+      resources :courses
+      resources :meal_items, only: [:index, :show, :update]
+      resources :reservations, controller: 'reservation_infos'
+        
     end
   end
 end
