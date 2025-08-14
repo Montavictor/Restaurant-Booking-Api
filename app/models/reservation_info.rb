@@ -1,6 +1,5 @@
 class ReservationInfo < ApplicationRecord
   before_validation :set_defaults
-  before_save :calculate_amounts
   # associations
   belongs_to :booking_date
 
@@ -28,11 +27,18 @@ class ReservationInfo < ApplicationRecord
     self.price ||= 2400                 
   end  
 
-  def calculate_amounts
-    if downpayment.nil? && price.present? && number_of_guest.present?
-      self.total = price * number_of_guest 
-      self.downpayment = total * 0.5
-    end
+  def self.calculate_amounts(guests, price: 2400)
+    guests = guests.to_i
+    price = price.to_i
+
+    total = price * guests
+    downpayment = total * 0.5 * 100 
+    downpayment = downpayment.to_i
+    {
+      price: price,
+      downpayment: downpayment,
+      total: total * 100 
+    }
   end
 end
     
