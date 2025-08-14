@@ -35,73 +35,98 @@ class Api::V1::ReservationInfosController < ApplicationController
       except: [:created_at, :updated_at]
     ) 
   end
-
+  def cancel
+    
+    # 1 week before 
+  end
   # POST /reservation_infos or /api/v1/reservations
   def create
-    ActiveRecord::Base.transaction do
-      booking_date = BookingDate.find_or_create_by!(date: reservation_info_params[:reservation_date])
+    payload = reservation_info_params.to_h
+    amounts = ReservationInfo.calculate_amounts(payload[:number_of_guest], price: 2400)
+    payment_intent = Stripe::PaymentIntent.create(
+      amount: amounts[:downpayment], 
+      currency: 'usd',
+      payment_method_types: ['card'],
+      metadata: payload
+    )
+    render json: {
+      stripe_client_secret: payment_intent.client_secret
+    }, status: :created
 
-      @reservation_info = ReservationInfo.new(reservation_info_params)
-      @reservation_info.booking_date = booking_date
-      if @reservation_info.meal_period.downcase == 'lunch'
-        BookingDate.where(date: booking_date.date).update(is_lunch_available: false)
-      elsif @reservation_info.meal_period.downcase == 'dinner'
-        BookingDate.where(date: booking_date.date).update(is_dinner_available: false)
-      end
-      @reservation_info.save!
-      
-      payment_intent = Stripe::PaymentIntent.create(
-        amount: (@reservation_info.downpayment).to_i,
-        currency: 'usd', metadata: {
-          reservation_info_id: @reservation_info.id,
-          customer_email: @reservation_info.email
-        }
-      )
-      @reservation_info.update!(stripe_id: payment_intent.id)
-      render json: {
-        reservation: @reservation_info.as_json(
-          include: { booking_date: { only: [:id, :date, :is_lunch_available, :is_dinner_available] } }
-        ),
-        stripe_client_secret: payment_intent.client_secret
-      }, status: :created
-
-    rescue ActiveRecord::RecordInvalid => e
-      render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
-    end
   end
 
-  # PATCH/PUT /reservation_infos/1
-  def update
-    if @reservation_info.update(reservation_info_params)
-      render json: @reservation_info
-    else
-      render json: @reservation_info.errors, status: :unprocessable_entity
-    end
-  end
+  def confirm
+    # validation for payment intent ID
+    payment_intent_id = params[:payment_intent_id]
+    return render json: { error: "Payment intent ID is required" }, status: :unprocessable_entity unless payment_intent_id
 
-  # DELETE /reservation_infos/1
-  def destroy
-    @reservation_info.destroy!
+    payment_intent = Stripe::PaymentIntent.retrieve(payment_intent_id)
+    return render json: { error: "Payment not successful" }, status: :unprocessable_entity unless payment_intent.status == 'succeeded'
+
+    # check if reservation already exists
+    if existing_reservation = ReservationInfo.find_by(stripe_id: payment_intent.id)
+      return render json: { message: "Reservation already exists", reservation_id: existing_reservation.id }, status: :ok
+    end
+    
+    # create new reservation  
+    reservation = persists_from_payment_intent(payment_intent)  
+    render json: { message: 'Reservation confirmed', reservation_id: reservation.id }, status: :created
   end
 
   private
 
-    def set_reservation_info
-      @reservation_info = ReservationInfo.find(params[:id])
-    end
+  def set_reservation_info
+    @reservation_info = ReservationInfo.find(params[:id])
+  end
 
-    def record_not_found
-      render json: { error: "Schedule slot not found" }, status: :not_found
-    end
+  def record_not_found
+    render json: { error: "Schedule slot not found" }, status: :not_found
+  end
 
-    def handle_record_invalid(exception)
-      render json: { errors: exception.record.errors.full_messages }, status: :unprocessable_entity
+  def handle_record_invalid(exception)
+    render json: { errors: exception.record.errors.full_messages }, status: :unprocessable_entity
+  end
+
+    # Converts Stripe payment intent to a ReservationInfo object
+  def persists_from_payment_intent(payment_intent)
+    attributes = {
+      first_name: payment_intent.metadata['first_name'],
+      last_name: payment_intent.metadata['last_name'],
+      email: payment_intent.metadata['email'],
+      mobile_number: payment_intent.metadata['mobile_number'],
+      reservation_date: payment_intent.metadata['reservation_date'],
+      meal_period: payment_intent.metadata['meal_period'],
+      number_of_guest: payment_intent.metadata['number_of_guest'],
+      customer_notes: payment_intent.metadata['customer_notes'],
+      first_course: payment_intent.metadata['first_course'],
+      second_course: payment_intent.metadata['second_course'],
+      third_course: payment_intent.metadata['third_course'],
+      fourth_course: payment_intent.metadata['fourth_course'],
+      fifth_course: payment_intent.metadata['fifth_course'],
+      sixth_course: payment_intent.metadata['sixth_course'],
+      seventh_course: payment_intent.metadata['seventh_course'],
+      eighth_course: payment_intent.metadata['eighth_course'],
+      ninth_course: payment_intent.metadata['ninth_course'],
+      stripe_id: payment_intent.id,
+      status: 'confirmed',
+    }
+
+    ActiveRecord::Base.transaction do
+      booking_date = BookingDate.find_or_create_by(date: attributes[:reservation_date])
+      reservation_info = ReservationInfo.create!(attributes.merge(booking_date: booking_date))
+      if reservation_info.meal_period == 'lunch'
+        booking_date.update(is_lunch_available: false)
+      elsif reservation_info.meal_period == 'dinner'
+        booking_date.update(is_dinner_available: false)
+      end
+      reservation_info
     end
+  end
 
     # Only allow a list of trusted parameters through.
-    def reservation_info_params
-      params.require(:reservation_info).permit(
-        :first_name, :last_name, :email, :mobile_number, :reservation_date, :meal_period, :number_of_guest, :customer_notes, :first_course, :second_course, :third_course, :fourth_course, :fifth_course, :sixth_course, :seventh_course, :eighth_course, :ninth_course
-      )
-    end
+  def reservation_info_params
+    params.require(:reservation_info).permit(
+      :first_name, :last_name, :email, :mobile_number, :reservation_date, :meal_period, :number_of_guest, :customer_notes, :first_course, :second_course, :third_course, :fourth_course, :fifth_course, :sixth_course, :seventh_course, :eighth_course, :ninth_course, :downpayment
+    )
+  end
 end
