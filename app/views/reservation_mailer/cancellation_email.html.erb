@@ -1,0 +1,9 @@
+<h1>Reservation Cancelled</h1>
+<p>Hello <%= @reservation.first_name %>,</p>
+<p>Your reservation for <%= @reservation.reservation_date.strftime("%B %d, %Y") %> (<%= @reservation.meal_period.capitalize %>)
+has been successfully cancelled.</p>
+<p>We hope to serve you again soon.</p>
+<p>If you have any questions or need further assistance, please feel free to contact us.</p>
+<p>Thank you for choosing us!</p>
+<p>Best regards,</p>
+<p>The Private Restaurant Booking Team</p>

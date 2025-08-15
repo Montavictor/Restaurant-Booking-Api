@@ -49,3 +49,6 @@ gem "devise-jwt", "~> 0.12.1"
 gem 'jsonapi-serializer'
 
 gem "dotenv-rails"
+
+gem "sidekiq"
+gem "sinatra", github: "sinatra/sinatra"
