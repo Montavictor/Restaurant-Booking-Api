@@ -1,63 +1,92 @@
-# app/controllers/api/v1/stripe/webhooks_controller.rb
-class Api::V1::Stripe::WebhooksController < ApplicationController
-  skip_before_action :verify_authenticity_token
+class Api::V1::StripeWebhooksController < ApplicationController
+  skip_before_action :verify_authenticity_token, raise: false 
 
   def create
     payload = request.body.read
-    sig     = request.env["HTTP_STRIPE_SIGNATURE"]
-    secret  = ENV["STRIPE_WEBHOOK_SECRET"]
+    sig_header = request.env['HTTP_STRIPE_SIGNATURE']
+    endpoint_secret = ENV['STRIPE_WEBHOOK_SECRET']
 
-    event = Stripe::Webhook.construct_event(payload, sig, secret)
+    begin
+      event = Stripe::Webhook.construct_event(
+        payload,
+        sig_header,
+        endpoint_secret
+      )
+    rescue JSON::ParserError => e
+      return render json: { error: "Invalid payload" }, status: 400
+    rescue Stripe::SignatureVerificationError => e
+      return render json: { error: "Invalid signature" }, status: 400
+    end
 
-    case event["type"]
-    when "payment_intent.succeeded"
-      pi = event["data"]["object"]
-
-      # Idempotent: skip if already created (by this webhook or /confirm)
-      ReservationInfo.find_by(stripe_id: pi["id"]) || persist_from_pi!(pi)
+    case event.type
+    when 'payment_intent.succeeded'
+      handle_payment_intent_succeeded(event.data.object)
+    when 'charge.refunded'
+      handle_charge_refunded(event.data.object)
     end
 
     head :ok
-  rescue JSON::ParserError, Stripe::SignatureVerificationError => e
-    render json: { error: e.message }, status: :bad_request
   end
 
   private
 
-  # Reuse the same logic; you can extract to a service to DRY.
-  def persist_from_pi!(pi)
-    # Build a fake controller to reuse helpers, or inline the same logic here:
-    md = pi["metadata"]
+  def handle_payment_intent_succeeded(payment_intent)
+    return if ReservationInfo.exists?(stripe_id: payment_intent.id)
+    reservation = persist_from_payment_intent(payment_intent)
+    ReservationMailer.confirmation_email(reservation).deliver_now
+  end
 
-    attrs = {
-      first_name:       md["first_name"],
-      last_name:        md["last_name"],
-      email:            md["email"],
-      mobile_number:    md["mobile_number"],
-      reservation_date: md["reservation_date"],
-      meal_period:      md["meal_period"],
-      number_of_guest:  md["number_of_guest"],
-      customer_notes:   md["customer_notes"],
-      first_course:     md["first_course"],
-      second_course:    md["second_course"],
-      third_course:     md["third_course"],
-      fourth_course:    md["fourth_course"],
-      fifth_course:     md["fifth_course"],
-      sixth_course:     md["sixth_course"],
-      seventh_course:   md["seventh_course"],
-      eighth_course:    md["eighth_course"],
-      ninth_course:     md["ninth_course"],
-      status:           "confirmed",
-      stripe_id:        pi["id"]
+  def handle_charge_refunded(charge)
+    reservation = ReservationInfo.find_by(stripe_id: charge.payment_intent)
+    return unless reservation
+
+    reservation.update!(status: 'cancelled')
+    
+    # Release time slot
+    booking_date = reservation.booking_date
+    if reservation.meal_period == 'lunch'
+      booking_date.update!(is_lunch_available: true)
+    elsif reservation.meal_period == 'dinner'
+      booking_date.update!(is_dinner_available: true)
+    end
+    
+    ReservationMailer.cancellation_email(reservation).deliver_later
+  end
+
+  def persist_from_payment_intent(payment_intent)
+    metadata = payment_intent.metadata
+    
+    attributes = {
+      first_name: metadata['first_name'],
+      last_name: metadata['last_name'],
+      email: metadata['email'],
+      mobile_number: metadata['mobile_number'],
+      reservation_date: metadata['reservation_date'],
+      meal_period: metadata['meal_period'],
+      number_of_guest: metadata['number_of_guest'].to_i,
+      customer_notes: metadata['customer_notes'],
+      first_course: metadata['first_course'],
+      second_course: metadata['second_course'],
+      third_course: metadata['third_course'],
+      fourth_course: metadata['fourth_course'],
+      fifth_course: metadata['fifth_course'],
+      sixth_course: metadata['sixth_course'],
+      seventh_course: metadata['seventh_course'],
+      eighth_course: metadata['eighth_course'],
+      ninth_course: metadata['ninth_course'],
+      stripe_id: payment_intent.id,
+      status: 'confirmed',
+      cancellation_token: SecureRandom.hex(10)
     }.compact
 
     ActiveRecord::Base.transaction do
-      booking_date = BookingDate.find_or_create_by!(date: attrs[:reservation_date])
-      reservation  = ReservationInfo.create!(attrs.merge(booking_date: booking_date))
-      case reservation.meal_period.to_s.downcase
-      when "lunch"  then booking_date.update!(is_lunch_available: false)
-      when "dinner" then booking_date.update!(is_dinner_available: false)
+      booking_date = BookingDate.find_or_create_by!(date: attributes[:reservation_date])
+      reservation = ReservationInfo.create!(attributes.merge(booking_date: booking_date))
+      case reservation.meal_period.downcase
+      when 'lunch' then booking_date.update!(is_lunch_available: false)
+      when 'dinner' then booking_date.update!(is_dinner_available: false)
       end
+      
       reservation
     end
   end

@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  require "sidekiq/web"
+  mount Sidekiq::Web => "/sidekiq"
+  
   namespace :api do
     namespace :v1, defaults: { format: :json } do
       devise_for :users,
@@ -16,7 +19,7 @@ Rails.application.routes.draw do
       # other routes...
       resources :booking_dates, only: [:index, :show, :create] 
       resources :reservation_infos, only: [:index, :show, :create]
-      resources :courses
+      resources :courses 
       resources :meal_items, only: [:index, :show, :update]
       resources :reservations, controller: 'reservation_infos', only: [:create] do
         collection do
@@ -24,7 +27,7 @@ Rails.application.routes.draw do
            post 'cancel'
         end
       end
-      post "stripe/webhook", to: "stripe#webhook"
+      post "stripe/webhook", to: "stripe_webhooks#create"
     end
   end
 end

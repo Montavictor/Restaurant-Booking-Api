@@ -25,6 +25,7 @@ module NotesAppBackend
     config.autoload_lib(ignore: %w[assets tasks])
 
     config.api_only = true
+    config.active_job.queue_adapter = :sidekiq
 
     # ✅ Required for Devise + JWT (even if you're not using cookies explicitly)
     # 1. Allow cookies so Warden/Devise can store sessions for JWT dispatch/revocation
