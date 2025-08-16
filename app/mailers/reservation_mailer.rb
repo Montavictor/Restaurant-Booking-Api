@@ -1,6 +1,6 @@
 class ReservationMailer < ApplicationMailer
   default from: 'no-reply@yourdomain.com'
-  def reservation_confirmation(reservation)
+  def confirmation_email(reservation)
     @reservation = reservation
     @booking_date = reservation.booking_date
     @reservation_date = @booking_date.date.strftime("%B %d, %Y")
@@ -12,9 +12,9 @@ class ReservationMailer < ApplicationMailer
     @mobile_number = reservation.mobile_number
     @email = reservation.email
     @price = reservation.price
-    @downpayment = reservation.downpayment
+    @downpayment = reservation.downpayment || 0
     @cancellation_token = reservation.cancellation_token
-    @total = ReservationInfo.calculate_total(@number_of_guest, price: @price, downpayment: @downpayment)
+    @total = reservation.total || 0
     @courses = [
       @reservation.first_course,
       @reservation.second_course,
@@ -32,5 +32,18 @@ class ReservationMailer < ApplicationMailer
     @reservation = reservation
     @cancellation_token = reservation.cancellation_token
     mail(to: @reservation.email, subject: 'Your Reservation has been Cancelled')
+  end
+  def reminder_email(reservation)
+    @reservation = reservation
+    @booking_date = reservation.booking_date
+    @reservation_date = @booking_date.date.strftime("%B %d, %Y")
+    @meal_period = reservation.meal_period
+    @number_of_guest = reservation.number_of_guest
+    @customer_notes = reservation.customer_notes
+    @first_name = reservation.first_name
+    @last_name = reservation.last_name
+    @mobile_number = reservation.mobile_number
+    @email = reservation.email
+    mail(to: @reservation.email, subject: 'Reservation Reminder')
   end
 end

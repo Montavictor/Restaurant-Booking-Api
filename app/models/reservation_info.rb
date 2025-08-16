@@ -1,6 +1,7 @@
 class ReservationInfo < ApplicationRecord
   before_validation :set_defaults, :calculate_total
   before_create :generate_cancellation_token 
+  after_create :schedule_reminder_email
   
   # associations
   belongs_to :booking_date, optional: true
@@ -72,6 +73,11 @@ class ReservationInfo < ApplicationRecord
     {
       total: total
     }
+  end
+  
+  def schedule_reminder_email
+    reminder_date = (reservation_date.to_date - 2.days).beginning_of_day + 9.hours
+    ReservationReminderJob.set(wait_until: reminder_date).perform_later(self.id)
   end
 end
     
