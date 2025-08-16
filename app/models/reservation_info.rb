@@ -1,9 +1,9 @@
 class ReservationInfo < ApplicationRecord
   # Callbacks
   before_validation :set_defaults, :calculate_total
-  before_create :generate_cancellation_token 
+  before_create :generate_cancellation_token
   # after_create :schedule_reminder_email
-  
+
   # Associations
   belongs_to :booking_date, optional: true
 
@@ -19,7 +19,7 @@ class ReservationInfo < ApplicationRecord
             :reservation_date, :meal_period, :number_of_guest, presence: true
 
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, length: { maximum: 100 }
-  validates :mobile_number, numericality: { only_integer: true }, length: { is: 11}, presence: true
+  validates :mobile_number, numericality: { only_integer: true }, length: { is: 11 }, presence: true
   validates :number_of_guest, numericality: { only_integer: true, greater_than_or_equal_to: 12, less_than_or_equal_to: 24 }
   validates :meal_period, inclusion: { in: %w[lunch dinner] }
   validates :downpayment, numericality: { only_integer: true }, allow_blank: true
@@ -36,7 +36,7 @@ class ReservationInfo < ApplicationRecord
   # Callbacks
   def set_defaults
     self.price ||= BASE_PRICE
-  end  
+  end
 
   def generate_cancellation_token
     self.cancellation_token ||= SecureRandom.hex(10)
@@ -79,9 +79,9 @@ class ReservationInfo < ApplicationRecord
 
     total = if downpayment.present? && downpayment >= MIN_DOWNPAYMENT && downpayment < price * guests
               downpayment * 100
-            else
+    else
               price * guests * 100
-            end
+    end
 
     { total: total }
   end

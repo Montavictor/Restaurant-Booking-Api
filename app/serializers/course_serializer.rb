@@ -1,4 +1,4 @@
-class CourseSerializer 
+class CourseSerializer
   include JSONAPI::Serializer
   attributes :id, :name, :position
 
