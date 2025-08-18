@@ -5,6 +5,6 @@ class BookingDate < ApplicationRecord
 
   # validations
   validates :date, presence: true
-  validates :is_lunch_available, inclusion: { in: [true, false] }
-  validates :is_dinner_available, inclusion: { in: [true, false] }
+  validates :is_lunch_available, inclusion: { in: [ true, false ] }
+  validates :is_dinner_available, inclusion: { in: [ true, false ] }
 end

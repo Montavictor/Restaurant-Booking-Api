@@ -3,7 +3,8 @@ class Api::V1::MealItemsController < ApplicationController
 
   # GET /api/v1/meal_items
   def index
-    @api_v1_meal_items = Api::V1::MealItem.all
+    @course = Api::V1::Course.find_by(id: params[:id])
+    @api_v1_meal_items = @course.meal_items
 
     render json: @api_v1_meal_items
   end

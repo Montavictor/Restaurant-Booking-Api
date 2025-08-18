@@ -1,9 +1,12 @@
 class ReservationInfo < ApplicationRecord
+  rescue_from ActiveRecord::RecordNotUnique do 
+    errors.add(:base, "Reservation slot is already taken")
+  end
   # Callbacks
   before_validation :set_defaults, :calculate_total
-  before_create :generate_cancellation_token 
+  before_create :generate_cancellation_token
   # after_create :schedule_reminder_email
-  
+
   # Associations
   belongs_to :booking_date, optional: true
 
@@ -19,24 +22,24 @@ class ReservationInfo < ApplicationRecord
             :reservation_date, :meal_period, :number_of_guest, presence: true
 
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, length: { maximum: 100 }
-  validates :mobile_number, numericality: { only_integer: true }, length: { is: 11}, presence: true
+  validates :mobile_number, numericality: { only_integer: true }, length: { is: 11 }
   validates :number_of_guest, numericality: { only_integer: true, greater_than_or_equal_to: 12, less_than_or_equal_to: 24 }
   validates :meal_period, inclusion: { in: %w[lunch dinner] }
   validates :downpayment, numericality: { only_integer: true }, allow_blank: true
   validates :status, inclusion: { in: %w[pending confirmed cancelled] }, allow_nil: true
   validates :cancellation_token, uniqueness: true, allow_nil: true
-  validates :customer_notes, length: { maximum: 500 }, allow_blank: true
+  validates :customer_notes, length: { maximum: 250 }, allow_blank: true
   validates :first_name, :last_name, length: { maximum: 50 }
   validates :first_course, :second_course, :third_course, :fourth_course,
             :fifth_course, :sixth_course, :seventh_course, :eighth_course,
-            :ninth_course, presence: true, length: { maximum: 255 }
+            :ninth_course, presence: true, length: { maximum: 100 }
 
   private
 
   # Callbacks
   def set_defaults
     self.price ||= BASE_PRICE
-  end  
+  end
 
   def generate_cancellation_token
     self.cancellation_token ||= SecureRandom.hex(10)
@@ -64,12 +67,12 @@ class ReservationInfo < ApplicationRecord
     self.total = (price || BASE_PRICE) * (number_of_guest.to_i)
   end
 
-  # def schedule_reminder_email
-  #   return unless reservation_date.present?
+  def schedule_reminder_email
+    return unless reservation_date.present?
 
-  #   reminder_date = (reservation_date.to_date - 2.days).beginning_of_day + 9.hours
-  #   ReservationReminderJob.set(wait_until: reminder_date).perform_later(self.id)
-  # end
+    reminder_date = (reservation_date.to_date - 2.days).beginning_of_day + 9.hours
+    ReservationReminderJob.perform_at(reminder_date, self.id)
+  end
 
   # Class methods
   def self.calculate_amounts(guests, downpayment: nil)
@@ -79,9 +82,9 @@ class ReservationInfo < ApplicationRecord
 
     total = if downpayment.present? && downpayment >= MIN_DOWNPAYMENT && downpayment < price * guests
               downpayment * 100
-            else
+    else
               price * guests * 100
-            end
+    end
 
     { total: total }
   end
