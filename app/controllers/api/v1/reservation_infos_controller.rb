@@ -67,7 +67,6 @@ class Api::V1::ReservationInfosController < ApplicationController
     ActiveRecord::Base.transaction do
       reservation.lock!
       reservation.update!(status: "cancelled")
-      ReservationMailer.cancellation_email(reservation).deliver_now
       if reservation.stripe_id.present?
         begin
             Stripe::Refund.create(
