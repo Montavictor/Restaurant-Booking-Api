@@ -8,7 +8,7 @@ class ReservationMailer < ApplicationMailer
     mail(
       to: reservation.email,
       subject: "Reservation Confirmed - #{reservation.reservation_date}",
-      template_name: 'confirmation'
+      template_name: 'confirmation_email'
     )
   end
   
@@ -19,7 +19,7 @@ class ReservationMailer < ApplicationMailer
     mail(
       to: reservation.email,
       subject: "Reservation Cancelled - #{reservation.reservation_date}",
-      template_name: 'cancellation'
+      template_name: 'cancellation_email'
     )
   end
   
@@ -30,7 +30,7 @@ class ReservationMailer < ApplicationMailer
     mail(
       to: reservation.email,
       subject: "Reservation Reminder - Tomorrow at #{reservation.meal_period.capitalize}",
-      template_name: 'reminder'
+      template_name: 'reminder_email'
     )
   end
 end

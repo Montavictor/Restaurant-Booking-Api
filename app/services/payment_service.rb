@@ -97,7 +97,7 @@ class PaymentService
   end
   
   def generate_idempotency_key
-    Digest::MD5.hexdigest("#{reservation_params[:email]}-#{reservation_params[:reservation_date]}-#{reservation_params[:meal_period]}-#{Time.current.to_date}")
+    Digest::MD5.hexdigest("#{reservation_params[:email]}-#{reservation_params[:reservation_date]}-#{reservation_params[:meal_period]}-#{reservation_params[:number_of_guest]}-#{reservation_params[:downpayment]}")
   end
   
   def create_reservation_from_payment_intent(payment_intent)
