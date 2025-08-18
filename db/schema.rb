@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_08_18_052739) do
+ActiveRecord::Schema[7.2].define(version: 2025_08_18_102920) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -73,8 +73,11 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_18_052739) do
     t.string "seventh_course"
     t.string "eighth_course"
     t.string "ninth_course"
+    t.datetime "webhook_processed_at"
     t.index ["booking_date_id"], name: "index_reservation_infos_on_booking_date_id"
+    t.index ["cancellation_token"], name: "index_reservation_infos_on_cancellation_token", unique: true
     t.index ["reservation_date", "meal_period"], name: "idx_unique_reservation_slot", unique: true
+    t.index ["stripe_id"], name: "index_reservation_infos_on_stripe_id", unique: true
   end
 
   create_table "users", force: :cascade do |t|
