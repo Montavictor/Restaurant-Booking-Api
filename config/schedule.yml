@@ -1,0 +1,4 @@
+ReservationReminderJob:
+  cron: "0 9 * * *"
+  class: "SendReservationRemindersJob"
+  queue: default

@@ -52,3 +52,8 @@ gem "dotenv-rails"
 
 gem "sidekiq"
 gem "sinatra", github: "sinatra/sinatra"
+gem "sidekiq-cron"
+# Run against this stable release
+group :development, :test do
+  gem 'rspec-rails', '~> 8.0.0'
+end

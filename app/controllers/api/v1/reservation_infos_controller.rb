@@ -25,7 +25,7 @@ class Api::V1::ReservationInfosController < ApplicationController
     )
   end
   
-  # POST /reservation_infos
+  # POST /reservation_infos /reservations
   def create
     payment_service = PaymentService.new(reservation_info_params)
     result = payment_service.create_payment_intent
@@ -43,7 +43,7 @@ class Api::V1::ReservationInfosController < ApplicationController
     end
   end
   
-  # POST /reservation_infos/confirm
+  # POST  /reservations/confirm
   def confirm
     payment_service = PaymentService.new({})
     result = payment_service.confirm_payment(params[:payment_intent_id])
