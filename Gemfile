@@ -57,3 +57,6 @@ gem "sidekiq-cron"
 group :development, :test do
   gem 'rspec-rails', '~> 8.0.0'
 end
+group :development, :test do
+  gem 'factory_bot_rails'
+end

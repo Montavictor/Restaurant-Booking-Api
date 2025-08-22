@@ -1,4 +1,3 @@
-
 class ReservationInfo < ApplicationRecord
   # Callbacks
   before_validation :set_defaults, :calculate_total, :normalize_data
@@ -138,6 +137,8 @@ class ReservationInfo < ApplicationRecord
     self.cancellation_token ||= SecureRandom.hex(16)
   end
   
+  
+
   def booking_date_must_be_in_future
     return unless reservation_date.present?
     
