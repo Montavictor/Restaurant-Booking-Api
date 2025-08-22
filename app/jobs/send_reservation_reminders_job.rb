@@ -9,11 +9,12 @@ class SendReservationRemindersJob < ApplicationJob
                                  .where(booking_dates: { date: reminder_date })
                                  .where(status: "confirmed")
                                  .where(reminder_sent_at: nil)
-    
     Rails.logger.info "Found #{reservations.count} reservations for #{reminder_date}"
     
     sent_count = 0
     failed_count = 0
+
+    return if reservations.empty?
 
     reservations.find_each do |reservation|
       begin

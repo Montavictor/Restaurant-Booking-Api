@@ -2,7 +2,7 @@ class ReservationReminderJob < ApplicationJob
   queue_as :mailers
   retry_on StandardError, attempts: 3, wait: :exponentially_longer
 
-  def perform(reservation_id)
+  def perform(reservation_id = nil)
     reservation = ReservationInfo.find_by(id: reservation_id)
     return unless reservation&.confirmed?
     

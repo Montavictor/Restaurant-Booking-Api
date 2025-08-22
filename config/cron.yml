@@ -1,4 +1,0 @@
-send_reservation_reminders:
-  cron: "0 9 * * *"
-  class: SendReservationRemindersJob
-  description: "Send email reminders 2 days before reservation date"
