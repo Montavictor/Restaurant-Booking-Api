@@ -12,19 +12,35 @@
   <li><strong>Email:</strong> <%= @email %></li>
   <li><strong>Mobile Number:</strong> <%= @mobile_number %></li>
   <li><strong>Price:</strong> $<%= @price %></li>
-  <li><strong>Downpayment:</strong> $<%= @downpayment %></li>
+  <li><% if @downpayment.present? && @downpayment > 0 %>
+  <li><strong>Payment:</strong> <%= number_to_currency(@downpayment, unit: "PHP") %></li>
+<% else %>
+  <li><strong>Payment:</strong> Full Payment</li>
+<% end %>
+</li>
   <li><strong>Total:</strong> $<%= @total %></li>
 </ul>
 
 <h2>Courses Selected</h2>
 <ul>
-  <% @courses.each do |course| %>
-    <li><%= course %></li>
-  <% end %>
+  <li> First Course: <%= @first_course %> </li>
+  <li> Second Course: <%= @second_course %> </li>
+  <li> Third Course: <%= @third_course %> </li>
+  <li> Fourth Course: <%= @fourth_course %> </li>
+  <li> Fifth Course: <%= @fifth_course %> </li>
+  <li> Sixth Course: <%= @sixth_course %> </li>
+  <li> Seventh Course: <%= @seventh_course %> </li>
+  <li> Eighth Course: <%= @eighth_course %> </li>
+  <li> Ninth Course: <%= @ninth_course %> </li>
+
 </ul>
 
 <p>If you have any questions or need to make changes to your reservation, please contact us.</p>
 <p>If you want to cancel your reservation, please click the link below:</p>
-<p>cancel reservation link of FE </p>
+
+<a href='<%= "#{ENV['FRONTEND_URL']}/cancel/#{@cancellation_token}" %>'>Cancel Reservation</a>
+
+<p> Note that cancellations must be made at least 7 days before the reservation date.</p>
+
 <p>Best regards,</p>
 <p>Your Restaurant Team</p>
