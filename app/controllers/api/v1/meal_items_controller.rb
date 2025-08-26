@@ -11,6 +11,7 @@ class Api::V1::MealItemsController < ApplicationController
   # POST /api/v1/courses/:course_id/meal_items
   def create
     meal_item = @course.meal_items.new(meal_item_params)
+    
     if meal_item.save
       render json: meal_item, status: :created
     else
@@ -20,7 +21,7 @@ class Api::V1::MealItemsController < ApplicationController
 
   # GET /api/v1/courses/:course_id/meal_items/:id
   def show
-    render json: meal_item
+    render json: @meal_item
   end
 
   # PATCH /api/v1/courses/:course_id/meal_items/:id
@@ -41,7 +42,7 @@ class Api::V1::MealItemsController < ApplicationController
   private
 
   def set_meal_item
-    meal_item = @course.meal_items.find(params[:id])
+    @meal_item = @course.meal_items.find(params[:id])
   end
 
   def meal_item_params

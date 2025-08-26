@@ -10,6 +10,7 @@ class Api::V1::CoursesController < ApplicationController
   # POST /api/v1/courses
   def create
     course = Course.new(course_params)
+    
     if course.save
       render json: course, status: :created
     else
@@ -19,7 +20,7 @@ class Api::V1::CoursesController < ApplicationController
 
   # GET /api/v1/courses/:id
   def show
-    render json: course
+    render json: @course
   end
 
   # PATCH /api/v1/courses/:id
@@ -40,7 +41,7 @@ class Api::V1::CoursesController < ApplicationController
   private
 
   def course_params
-    params.require(:course).permit(:name, :description)
+    params.require(:course).permit(:name, :position)
   end
 
   def set_course
