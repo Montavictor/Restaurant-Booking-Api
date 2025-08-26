@@ -2,7 +2,8 @@ class ReservationInfo < ApplicationRecord
   # Callbacks
   before_validation :set_defaults, :calculate_total, :normalize_data
   before_create :generate_cancellation_token
-  
+  after_create :send_confirmation_email
+
   # Associations
   belongs_to :booking_date
   
@@ -90,7 +91,7 @@ class ReservationInfo < ApplicationRecord
     
     {
       total: amount_to_charge * 100, # Stripe expects cents
-      total_reservation_cost: total_amount,
+      total_reservation_cost: total_amount, 
       is_partial_payment: downpayment.present? && downpayment < total_amount
     }
   end
@@ -115,6 +116,7 @@ class ReservationInfo < ApplicationRecord
     transaction do
       lock!
       update!(status: 'cancelled')
+      ReservationMailer.cancellation_email(self).deliver_now
       booking_date.release_slot!(meal_period)
     end
   end
@@ -136,8 +138,10 @@ class ReservationInfo < ApplicationRecord
   def generate_cancellation_token
     self.cancellation_token ||= SecureRandom.hex(16)
   end
-  
-  
+
+  def send_confirmation_email
+    ReservationMailer.confirmation_email(self).deliver_now
+  end
 
   def booking_date_must_be_in_future
     return unless reservation_date.present?

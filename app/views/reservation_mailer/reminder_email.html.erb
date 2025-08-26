@@ -3,16 +3,30 @@
 <p>Dear <%= @first_name %> <%= @last_name %>,</p>
 
 <p>This is a friendly reminder about your upcoming reservation.</p>
-
+<% if @downpayment.present? && @downpayment > 0 %>
+  <p>
+    We received your downpayment of <%= number_to_currency(@downpayment, unit: "PHP") %>.
+    The remaining balance of <%= number_to_currency(@total - @downpayment, unit: "PHP") %> 
+    is due on the day of the reservation.
+  </p>
+<% else %>
+  <p>
+    Thank you for your reservation. Below are your Reservation Details.
+  </p>
+<% end %>
 <h2>Reservation Details</h2>
 <ul>
   <li><strong>Reservation Date:</strong> <%= @reservation_date %></li>
-  <li><strong>Meal Period:</strong> <%= @meal_period %></li>
+  <li><strong>Meal Period:</strong> <%= @meal_period %> 
+  <% if @meal_period.to_s.downcase == "lunch" %>(11:00 AM) 
+  <% else %> 
+  (6:00 PM) 
+  <% end %></li>
   <li><strong>Number of Guests:</strong> <%= @number_of_guest %></li>
   <li><strong>Email:</strong> <%= @email %></li>
   <li><strong>Mobile Number:</strong> <%= @mobile_number %></li>
 </ul>
-
+<strong> Reminder: Please be at the venue 30 minutes before <%= @meal_period %> time </strong>  
 <p>If you have any questions or need to make changes to your reservation, please contact us.</p>
 
 <p>Best regards,</p>

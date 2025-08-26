@@ -87,7 +87,7 @@ class Api::V1::StripeWebhooksController < ApplicationController
       reservation.update_column(:webhook_processed_at, Time.current)
       
       # Send confirmation email
-      ReservationMailer.confirmation_email(reservation).deliver_later
+      ReservationMailer.confirmation_email(reservation).deliver_now
       Rails.logger.info "Reservation #{reservation.id} created via webhook for payment intent #{payment_intent.id}"
     else
       Rails.logger.error "Failed to create reservation from webhook: #{result[:error]}"
