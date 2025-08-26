@@ -96,8 +96,9 @@
       ).transform_values { |v| v.to_s.truncate(500) } # Stripe metadata limits
     end
     
+    # use a fresh UUID for each new booking attempt
     def generate_idempotency_key
-      Digest::MD5.hexdigest("#{reservation_params[:email]}-#{reservation_params[:reservation_date]}-#{reservation_params[:meal_period]}-#{reservation_params[:number_of_guest]}-#{reservation_params[:downpayment]}")
+      SecureRandom.uuid
     end
     
     def create_reservation_from_payment_intent(payment_intent)
