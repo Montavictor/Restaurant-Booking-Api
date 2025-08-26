@@ -17,16 +17,28 @@ Rails.application.routes.draw do
                  }
 
       # other routes...
-      resources :booking_dates, only: [ :index, :show, :create ]
-      resources :reservation_infos, only: [ :index, :show, :create ]
-      resources :courses
-      resources :meal_items, only: [ :index, :show, :update ]
-      resources :reservations, controller: "reservation_infos", only: [ :create ] do
+
+      # reservations
+      resources :reservations, controller: "reservation_infos", only: [:index, :show, :create] do
         collection do
            post "confirm"
            post "cancel"
         end
       end
+
+      # bookings
+      resources :bookings, controller: "booking_dates" do
+        collection do
+          post :upsert
+        end
+      end
+
+      # courses has_many: meal_items
+      resources :courses do 
+        resources :meal_items
+      end
+
+      # for stripe webhook
       post "stripe/webhook", to: "stripe_webhooks#create"
     end
   end

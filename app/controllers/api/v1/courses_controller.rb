@@ -1,51 +1,49 @@
 class Api::V1::CoursesController < ApplicationController
-  before_action :set_api_v1_course, only: %i[ show update destroy ]
+  before_action :set_course, only: [:show, :update, :destroy]
 
   # GET /api/v1/courses
   def index
-    @api_v1_courses = Api::V1::Course.all
-
-    render json: @api_v1_courses
+    courses = Course.all
+    render json: courses
   end
 
-  # GET /api/v1/courses/1
-  def show
-    render json: @api_v1_course
-  end
-
-  # # POST /api/v1/courses
-  # def create
-  #   @api_v1_course = Api::V1::Course.new(api_v1_course_params)
-
-  #   if @api_v1_course.save
-  #     render json: @api_v1_course, status: :created, location: @api_v1_course
-  #   else
-  #     render json: @api_v1_course.errors, status: :unprocessable_entity
-  #   end
-  # end
-
-  # PATCH/PUT /api/v1/courses/1
-  def update
-    if @api_v1_course.update(api_v1_course_params)
-      render json: @api_v1_course
+  # POST /api/v1/courses
+  def create
+    course = Course.new(course_params)
+    if course.save
+      render json: course, status: :created
     else
-      render json: @api_v1_course.errors, status: :unprocessable_entity
+      render json: { errors: course.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
-  # DELETE /api/v1/courses/1
+  # GET /api/v1/courses/:id
+  def show
+    render json: course
+  end
+
+  # PATCH /api/v1/courses/:id
+  def update
+    if @course.update(course_params)
+      render json: @course
+    else
+      render json: { errors: @course.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  # DELETE /api/v1/courses/:id
   def destroy
-    @api_v1_course.destroy!
+    @course.destroy
+    head :no_content
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_api_v1_course
-      @api_v1_course = Api::V1::Course.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def api_v1_course_params
-      params.require(:api_v1_course).permit(:name, :position, :reservation_info_id)
-    end
+  def course_params
+    params.require(:course).permit(:name, :description)
+  end
+
+  def set_course
+    @course = Course.find(params[:id])
+  end
 end

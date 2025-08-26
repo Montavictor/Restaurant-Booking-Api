@@ -10,30 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_08_19_084435) do
+ActiveRecord::Schema[7.2].define(version: 2025_08_26_124004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
-
-  create_table "api_v1_courses", force: :cascade do |t|
-    t.string "name"
-    t.integer "position"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "api_v1_meal_items", force: :cascade do |t|
-    t.string "name"
-    t.string "description"
-    t.bigint "api_v1_course_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["api_v1_course_id"], name: "index_api_v1_meal_items_on_api_v1_course_id"
-  end
 
   create_table "booking_dates", force: :cascade do |t|
     t.date "date"
     t.boolean "is_lunch_available"
     t.boolean "is_dinner_available"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "courses", force: :cascade do |t|
+    t.string "name"
+    t.integer "position"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -44,6 +35,15 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_19_084435) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["jti"], name: "index_jwt_denylists_on_jti"
+  end
+
+  create_table "meal_items", force: :cascade do |t|
+    t.string "name"
+    t.string "description"
+    t.bigint "course_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id"], name: "index_meal_items_on_course_id"
   end
 
   create_table "reservation_infos", force: :cascade do |t|
@@ -79,6 +79,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_19_084435) do
     t.index ["cancellation_token"], name: "index_reservation_infos_on_cancellation_token", unique: true
     t.index ["reservation_date", "meal_period"], name: "idx_unique_reservation_slot", unique: true
     t.index ["stripe_id"], name: "index_reservation_infos_on_stripe_id", unique: true
+    t.index ["webhook_processed_at"], name: "index_reservation_infos_on_webhook_processed_at"
   end
 
   create_table "users", force: :cascade do |t|
@@ -96,6 +97,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_19_084435) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "api_v1_meal_items", "api_v1_courses"
+  add_foreign_key "meal_items", "courses"
   add_foreign_key "reservation_infos", "booking_dates"
 end
