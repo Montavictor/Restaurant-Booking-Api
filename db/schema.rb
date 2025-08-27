@@ -79,7 +79,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_26_124004) do
     t.index ["cancellation_token"], name: "index_reservation_infos_on_cancellation_token", unique: true
     t.index ["reservation_date", "meal_period"], name: "idx_unique_reservation_slot", unique: true
     t.index ["stripe_id"], name: "index_reservation_infos_on_stripe_id", unique: true
-    t.index ["webhook_processed_at"], name: "index_reservation_infos_on_webhook_processed_at"
   end
 
   create_table "users", force: :cascade do |t|

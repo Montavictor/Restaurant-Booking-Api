@@ -53,6 +53,9 @@ gem "dotenv-rails"
 gem "sidekiq"
 gem "sinatra", github: "sinatra/sinatra"
 gem "sidekiq-cron"
+
+gem 'paper_trail'
+
 # Run against this stable release
 group :development, :test do
   gem 'rspec-rails', '~> 8.0.0'
