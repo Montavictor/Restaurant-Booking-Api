@@ -34,8 +34,17 @@ Rails.application.routes.draw do
       end
 
       # courses has_many: meal_items
-      resources :courses do 
+      resources :courses do
         resources :meal_items
+      end
+
+      # paper trail
+      namespace :versions do
+        resources :courses do
+          resources :versions, only: [:index] do
+            post :revert, on: :member
+          end
+        end
       end
 
       # for stripe webhook

@@ -19,7 +19,7 @@ class Api::V1::CoursesController < ApplicationController
 
   # GET /api/v1/courses/:id
   def show
-    render json: course
+    render json: @course
   end
 
   # PATCH /api/v1/courses/:id

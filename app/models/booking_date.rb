@@ -1,7 +1,7 @@
 
 class BookingDate < ApplicationRecord
   has_many :reservation_infos, dependent: :destroy
-  
+  has_paper_trail
   validates :date, presence: true, uniqueness: true
   
   def mark_slot_unavailable!(meal_period)
