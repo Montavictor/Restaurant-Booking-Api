@@ -140,7 +140,8 @@ class ReservationInfo < ApplicationRecord
   end
 
   def send_confirmation_email
-    ReservationMailer.confirmation_email(self).deliver_now
+    ReservationMailer.confirmation_email(self).deliver_later
+    ReservationMailer.admin_email(self).deliver_later
   end
 
   def booking_date_must_be_in_future

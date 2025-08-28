@@ -2,7 +2,7 @@ class Api::V1::MealItemsController < ApplicationController
   before_action :set_course
   before_action :set_meal_item, only: [:show, :update, :destroy]
 
-# GET /api/v1/courses/:course_id/meal_items
+  # GET /api/v1/courses/:course_id/meal_items
   def index
     meal_items = @course.meal_items
     render json: meal_items

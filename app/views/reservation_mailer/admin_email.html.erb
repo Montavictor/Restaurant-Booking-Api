@@ -1,0 +1,31 @@
+<h1>Reservation Confirmation</h1>
+
+<h2>Reservation Details</h2>
+<ul>
+  <li><strong>Reservation Date:</strong> <%= @reservation_date %></li>
+  <li><strong>Meal Period:</strong> <%= @meal_period %></li>
+  <li><strong>Number of Guests:</strong> <%= @number_of_guest %></li>
+  <li><strong>Email:</strong> <%= @email %></li>
+  <li><strong>Mobile Number:</strong> <%= @mobile_number %></li>
+  <li><strong>Price:</strong> $<%= @price %></li>
+  <% if @downpayment.present? && @downpayment > 0 %>
+  <li><strong>Payment:</strong> <%= number_to_currency(@downpayment, unit: "PHP") %></li>
+<% else %>
+  <li><strong>Payment:</strong> Full Payment</li>
+<% end %>
+  <li><strong>Total:</strong> $<%= @total %></li>
+</ul>
+
+<h2>Courses Selected</h2>
+<ul>
+  <li> First Course: <%= @first_course %> </li>
+  <li> Second Course: <%= @second_course %> </li>
+  <li> Third Course: <%= @third_course %> </li>
+  <li> Fourth Course: <%= @fourth_course %> </li>
+  <li> Fifth Course: <%= @fifth_course %> </li>
+  <li> Sixth Course: <%= @sixth_course %> </li>
+  <li> Seventh Course: <%= @seventh_course %> </li>
+  <li> Eighth Course: <%= @eighth_course %> </li>
+  <li> Ninth Course: <%= @ninth_course %> </li>
+</ul>
+
