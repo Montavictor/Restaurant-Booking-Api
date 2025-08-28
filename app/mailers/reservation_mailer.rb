@@ -62,4 +62,24 @@ class ReservationMailer < ApplicationMailer
       template_name: 'reminder_email'
     )
   end
+
+  def admin_email(reservation)
+    @reservation = reservation
+    @first_name = reservation.first_name
+    @last_name = reservation.last_name
+    @reservation_date = reservation.booking_date&.date&.strftime("%B %d, %Y")
+    @meal_period = reservation.meal_period
+    @number_of_guest = reservation.number_of_guest
+    @email = reservation.email
+    @mobile_number = reservation.mobile_number
+    @downpayment = reservation.downpayment || 0
+    @total = reservation.total
+
+    mail(
+      to: ENV.fetch('GMAIL_EMAIL'),
+      subject: "New Reservation - #{@reservation_date}",
+      template_name: 'admin_email'
+    )
+  end
+
 end
