@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_08_27_181530) do
+ActiveRecord::Schema[7.2].define(version: 2025_08_29_035036) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -77,8 +77,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_08_27_181530) do
     t.datetime "reminder_sent_at"
     t.index ["booking_date_id"], name: "index_reservation_infos_on_booking_date_id"
     t.index ["cancellation_token"], name: "index_reservation_infos_on_cancellation_token", unique: true
-    t.index ["reservation_date", "meal_period"], name: "idx_unique_reservation_slot", unique: true
+    t.index ["reservation_date", "meal_period"], name: "idx_unique_reservation_slot", unique: true, where: "((status)::text = 'confirmed'::text)"
     t.index ["stripe_id"], name: "index_reservation_infos_on_stripe_id", unique: true
+    t.index ["webhook_processed_at"], name: "index_reservation_infos_on_webhook_processed_at"
   end
 
   create_table "users", force: :cascade do |t|

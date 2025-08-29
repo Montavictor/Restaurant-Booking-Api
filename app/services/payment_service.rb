@@ -123,6 +123,7 @@
         eighth_course: metadata["eighth_course"],
         ninth_course: metadata["ninth_course"],
         stripe_id: payment_intent.id,
+        downpayment: metadata["downpayment"],
         status: "confirmed"
       }
       

@@ -1,33 +1,83 @@
-<h1>Reservation Reminder</h1>
+<div
+  style="
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+      Helvetica, Arial, sans-serif;
+    color: #374151;
+    max-width: 600px;
+    margin: 40px auto 0 auto;
+    padding: 24px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    text-align: center;
+  "
+>
+  <!-- Logo -->
+  <div style="margin-bottom: 24px">
+    <img
+      src="https://i.imgur.com/y1jxH6X.png"
+      alt="Logo"
+      style="max-width: 300px; height: auto; margin: 30px auto 0 auto"
+    />
+  </div>
 
-<p>Dear <%= @first_name %> <%= @last_name %>,</p>
+  <h1 style="margin-bottom: 16px; line-height: 1.3; color: #374151">
+    Reservation Reminder
+  </h1>
 
-<p>This is a friendly reminder about your upcoming reservation.</p>
-<% if @downpayment.present? && @downpayment > 0 %>
-  <p>
-    We received your downpayment of <%= number_to_currency(@downpayment, unit: "PHP") %>.
-    The remaining balance of <%= number_to_currency(@total - @downpayment, unit: "PHP") %> 
-    is due on the day of the reservation.
-  </p>
-<% else %>
-  <p>
-    Thank you for your reservation. Below are your Reservation Details.
-  </p>
-<% end %>
-<h2>Reservation Details</h2>
-<ul>
-  <li><strong>Reservation Date:</strong> <%= @reservation_date %></li>
-  <li><strong>Meal Period:</strong> <%= @meal_period %> 
-  <% if @meal_period.to_s.downcase == "lunch" %>(11:00 AM) 
-  <% else %> 
-  (6:00 PM) 
-  <% end %></li>
-  <li><strong>Number of Guests:</strong> <%= @number_of_guest %></li>
-  <li><strong>Email:</strong> <%= @email %></li>
-  <li><strong>Mobile Number:</strong> <%= @mobile_number %></li>
-</ul>
-<strong> Reminder: Please be at the venue 30 minutes before <%= @meal_period %> time </strong>  
-<p>If you have any questions or need to make changes to your reservation, please contact us.</p>
+  <div style="text-align: left; line-height: 1.6; margin-top: 16px">
+    <p style="margin: 0 0 8px 0; font-weight: bold">
+      Dear <%= @first_name %> <%= @last_name %>,
+    </p>
 
-<p>Best regards,</p>
-<p>Your Restaurant Team</p>
+    <% if @downpayment.present? && @downpayment > 0 %>
+    <p style="margin: 0 0 16px 0">
+      We received your downpayment of <%= number_to_currency(@downpayment, unit:
+      "₱") %>. The remaining balance of <%= number_to_currency(@total -
+      @downpayment, unit: "₱") %> is due on the day of the reservation.
+    </p>
+    <% else %>
+    <p style="margin: 0 0 16px 0">
+      Your reservation is just around the corner! 🎉 We are excited to host you
+      in just 2 days. Get ready for a memorable dining experience with delicious
+      dishes and impeccable service.
+    </p>
+
+    <% end %>
+
+    <h2
+      style="
+        margin-top: 24px;
+        margin-bottom: 8px;
+        line-height: 1.25;
+        color: #f15623;
+      "
+    >
+      Reservation Details
+    </h2>
+    <ul style="list-style-type: none; padding: 0; line-height: 1.6">
+      <li><strong>Reservation Date:</strong> <%= @reservation_date %></li>
+      <li>
+        <strong>Meal Period:</strong> <%= @meal_period %> <% if
+        @meal_period.to_s.downcase == "lunch" %>(11:00 AM)<% else %>(6:00 PM)<%
+        end %>
+      </li>
+      <li><strong>Number of Guests:</strong> <%= @number_of_guest %></li>
+      <li><strong>Email:</strong> <%= @email %></li>
+      <li><strong>Mobile Number:</strong> <%= @mobile_number %></li>
+    </ul>
+
+    <p style="margin: 16px 0; font-weight: bold">
+      Reminder: Please be at the venue 30 minutes before <%= @meal_period %>
+      time.
+    </p>
+
+    <p style="margin: 16px 0">
+      If you have any questions, please contact us at
+      <strong>inquiries@mesaprivado.com</strong> or call
+      <strong>0917-560-5069</strong>.
+    </p>
+
+    <p style="margin: 0">Best regards,</p>
+    <p style="margin: 0"><strong>Mesa Privado Team</strong></p>
+  </div>
+</div>
