@@ -1,16 +1,10 @@
 class Api::V1::Versions::CoursesController < ApplicationController
   before_action :set_course, only: [:index, :revert]
-
+  
   # GET /api/v1/versions/courses/:course_id/versions
   def index
-    versions = @course.versions.map do |v|
-      {
-        id: v.id,
-        event: v.event,
-        changes: v.changeset,
-        whodunnit: v.whodunnit,
-        created_at: v.created_at
-      }
+    versions = @course.versions.order(created_at: :desc).map do |v|
+      format_version_summmary(v)
     end
     render json: versions
   end

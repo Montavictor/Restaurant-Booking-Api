@@ -51,7 +51,7 @@ class Api::V1::StripeWebhooksController < ApplicationController
       # Clear processing flag so it can be retried
       WebhookTracker.clear_processing(event.id)
       
-      # For critical errors, you might want to queue a retry job
+      # Retry
       if should_retry_webhook?(event.type)
         WebhookRetryJob.perform_later(event.id, event.type, event.data.to_hash)
       end
@@ -99,9 +99,6 @@ class Api::V1::StripeWebhooksController < ApplicationController
     
     # Update reservation status
     reservation.update!(status: "disputed")
-    
-    # Notify admin
-    AdminMailer.dispute_notification(reservation, dispute).deliver_later
     
     Rails.logger.warn "Dispute created for reservation #{reservation.id}"
   end
