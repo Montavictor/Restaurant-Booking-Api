@@ -72,8 +72,18 @@ class ReservationMailer < ApplicationMailer
     @number_of_guest = reservation.number_of_guest
     @email = reservation.email
     @mobile_number = reservation.mobile_number
+    @price = reservation.price
     @downpayment = reservation.downpayment || 0
     @total = reservation.total
+    @first_course = reservation.first_course
+    @second_course = reservation.second_course
+    @third_course = reservation.third_course
+    @fourth_course = reservation.fourth_course
+    @fifth_course = reservation.fifth_course
+    @sixth_course = reservation.sixth_course
+    @seventh_course = reservation.seventh_course
+    @eighth_course = reservation.eighth_course
+    @ninth_course = reservation.ninth_course
 
     mail(
       to: ENV.fetch('GMAIL_EMAIL'),
