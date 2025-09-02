@@ -3,7 +3,7 @@ class Api::V1::ReservationInfosController < ApplicationController
   
   before_action :set_reservation_info, only: [:show]
   
-  # GET /reservation_infos
+  # GET /reservations
   def index
     @reservation_infos = fetch_reservation_infos
     
@@ -15,7 +15,7 @@ class Api::V1::ReservationInfosController < ApplicationController
     )
   end
   
-  # GET /reservation_infos/1
+  # GET /reservations/1
   def show
     render json: @reservation_info.as_json(
       include: {
@@ -24,12 +24,12 @@ class Api::V1::ReservationInfosController < ApplicationController
       except: [:created_at, :updated_at]
     )
   end
-  
-  # POST /reservation_infos /reservations
+
+  # POST /reservations
   def create
     payment_service = PaymentService.new(reservation_info_params)
     result = payment_service.create_payment_intent
-    
+
     if result[:success]
       render json: {
         stripe_client_secret: result[:client_secret],
@@ -43,7 +43,7 @@ class Api::V1::ReservationInfosController < ApplicationController
     end
   end
   
-  # POST  /reservations/confirm
+  # POST /reservations/confirm
   def confirm
     payment_service = PaymentService.new({})
     result = payment_service.confirm_payment(params[:payment_intent_id])
@@ -62,12 +62,13 @@ class Api::V1::ReservationInfosController < ApplicationController
     end
   end
   
-  # POST /reservation_infos/cancel
+  # POST /reservations/cancel
   def cancel
     token = extract_cancellation_token
     return render_token_missing_error unless token.present?
     
     reservation = ReservationInfo.find_by(cancellation_token: token)
+    
     return render_reservation_not_found_error unless reservation
     
     if reservation.cancelled?

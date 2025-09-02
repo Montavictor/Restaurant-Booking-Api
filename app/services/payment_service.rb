@@ -47,7 +47,8 @@ class PaymentService
       payment_intent = Stripe::PaymentIntent.retrieve(payment_intent_id)
       
       unless payment_intent.status == "succeeded"
-        return { error: "Payment not successful", status: payment_intent.status }
+        return { error: "Payment not successful", 
+        status: payment_intent.status }
       end
       
       # Check for existing reservation
@@ -60,7 +61,9 @@ class PaymentService
       end
       
       reservation = create_reservation_from_payment_intent(payment_intent)
-      
+      if reservation
+        ReservationInfo.find_by(stripe_id: reservation.stripe_id).update!(webhook_processed_at: Time.current)
+      end
       {
         success: true,
         reservation_id: reservation.id,
@@ -92,7 +95,7 @@ class PaymentService
       :first_name, :last_name, :email, :mobile_number, :reservation_date,
       :meal_period, :number_of_guest, :customer_notes, :first_course,
       :second_course, :third_course, :fourth_course, :fifth_course,
-      :sixth_course, :seventh_course, :eighth_course, :ninth_course
+      :sixth_course, :seventh_course, :eighth_course, :ninth_course, :downpayment
     ).transform_values { |v| v.to_s.truncate(500) } 
   end
   

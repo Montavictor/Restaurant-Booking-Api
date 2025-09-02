@@ -1,0 +1,15 @@
+  Feature/Cron-Sidekiq[m
+  Feature/Email-sending-through-gmail-account[m
+  Feature/Paper-trail-Gem[m
+  Feature/Test-for-controllers[m
+  Fix/Code-Formatting[m
+  Fix/Edge-cases-code-refactoring[m
+  Fix/Mobile-Validation[m
+* [32mFix/Paper-trail-Fix-For-Course[m
+  Fix/Sidekiq-email-scheduler[m
+  Hotfix/Mobile-Validation-Changed[m
+  api/backend-api-for-costumers[m
+  feature/api-endpoints-confirm-create-stripewebhook[m
+  feature/cancel-end-point-and-fix-for-validation-of-create[m
+  feature/sidekiq-email-scheduler[m
+  main[m

@@ -20,7 +20,7 @@ class ReservationInfo < ApplicationRecord
   
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, 
             length: { maximum: 100 }
-  validates :mobile_number, format: { with: /\A\d{11}\z/ }
+  validates :mobile_number, format: { with: /\A09\d{9}\z/, message: "must start with 09 and be 11 digits long" }
   validates :number_of_guest, numericality: { 
     only_integer: true, 
     greater_than_or_equal_to: 12, 
@@ -42,6 +42,7 @@ class ReservationInfo < ApplicationRecord
   # Custom validations
   validate :booking_date_must_be_in_future
   validate :cancellation_window_validation, on: :cancel
+  validate :check_for_date_and_period, on: :create
   
   # Scopes
   scope :confirmed, -> { where(status: 'confirmed') }
@@ -79,6 +80,7 @@ class ReservationInfo < ApplicationRecord
     return { error: "Invalid number of guests" } if guests < 12 || guests > 24
     
     price = BASE_PRICE
+    raw_downpayment = downpayment
     downpayment = downpayment.to_i
     
     total_amount = price * guests
@@ -92,7 +94,7 @@ class ReservationInfo < ApplicationRecord
     {
       total: amount_to_charge * 100, # Stripe expects cents
       total_reservation_cost: total_amount, 
-      is_partial_payment: downpayment.present? && downpayment < total_amount
+      is_partial_payment: raw_downpayment.present? && downpayment < total_amount
     }
   end
   
@@ -142,6 +144,14 @@ class ReservationInfo < ApplicationRecord
   def send_confirmation_email
     ReservationMailer.confirmation_email(self).deliver_later
     ReservationMailer.admin_email(self).deliver_later
+  end
+
+  def check_for_date_and_period
+    return unless reservation_date.present? && meal_period.present?
+
+    if ReservationInfo.for_date_and_period(reservation_date, meal_period).exists?
+      errors.add(:base, "The selected meal period is already booked for this date.")
+    end
   end
 
   def booking_date_must_be_in_future
