@@ -91,5 +91,4 @@ class ReservationMailer < ApplicationMailer
       template_name: 'admin_email'
     )
   end
-
 end

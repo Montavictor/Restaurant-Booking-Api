@@ -36,13 +36,12 @@ Rails.application.routes.draw do
       # courses has_many: meal_items
       resources :courses do
         resources :meal_items
-      end
-
-      # paper trail
-      namespace :versions do
-        resources :courses do
-          resources :versions, only: [:index] do
-            post :revert, on: :member
+        resources :versions, only: [:index, :show], controller: 'versions/courses' do
+          member do
+            post 'revert'
+          end
+          collection do
+            get 'compare/:version_1/:version_2', action: :compare
           end
         end
       end

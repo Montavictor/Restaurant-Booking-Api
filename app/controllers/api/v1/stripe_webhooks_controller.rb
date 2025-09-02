@@ -34,6 +34,9 @@ class Api::V1::StripeWebhooksController < ApplicationController
     begin
       case event.type
       when "payment_intent.succeeded"
+        payment_intent = event.data.object
+        reservation = ReservationInfo.find_by(stripe_id: payment_intent["id"])
+        reservation.update!(webhook_processed_at: Time.current) if reservation && !reservation.webhook_processed_at
         handle_payment_intent_succeeded(event.data.object)
       when "charge.dispute.created"
         handle_charge_dispute_created(event.data.object)
@@ -51,7 +54,7 @@ class Api::V1::StripeWebhooksController < ApplicationController
       # Clear processing flag so it can be retried
       WebhookTracker.clear_processing(event.id)
       
-      # For critical errors, you might want to queue a retry job
+      # Retry
       if should_retry_webhook?(event.type)
         WebhookRetryJob.perform_later(event.id, event.type, event.data.to_hash)
       end
@@ -73,7 +76,7 @@ class Api::V1::StripeWebhooksController < ApplicationController
     if existing_reservation
       # Update webhook_processed_at if not already set
       unless existing_reservation.webhook_processed_at
-        existing_reservation.update_column(:webhook_processed_at, Time.current)
+        existing_reservation.update!(webhook_processed_at: Time.current)
       end
       Rails.logger.info "Reservation #{existing_reservation.id} already exists for payment intent #{payment_intent.id}"
       return
@@ -84,8 +87,9 @@ class Api::V1::StripeWebhooksController < ApplicationController
     
     if result[:success]
       reservation = ReservationInfo.find(result[:reservation_id])
-      reservation.update_column(:webhook_processed_at, Time.current)
-      
+      reservation.update!(webhook_processed_at: Time.current)
+      Rails.logger.info ">>> Updating webhook_processed_at for reservation #{reservation.id} at #{Time.current}"
+
       Rails.logger.info "Reservation #{reservation.id} created via webhook for payment intent #{payment_intent.id}"
     else
       Rails.logger.error "Failed to create reservation from webhook: #{result[:error]}"
@@ -99,9 +103,6 @@ class Api::V1::StripeWebhooksController < ApplicationController
     
     # Update reservation status
     reservation.update!(status: "disputed")
-    
-    # Notify admin
-    AdminMailer.dispute_notification(reservation, dispute).deliver_later
     
     Rails.logger.warn "Dispute created for reservation #{reservation.id}"
   end
