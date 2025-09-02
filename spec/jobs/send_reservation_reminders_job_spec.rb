@@ -12,7 +12,7 @@ RSpec.describe SendReservationRemindersJob, type: :job do
       first_name: 'John',
       last_name: 'Doe',
       email: 'john@example.com',
-      mobile_number: '12345678901',
+      mobile_number: '09345678901',
       reservation_date: reminder_date,
       meal_period: 'lunch',
       number_of_guest: 12,

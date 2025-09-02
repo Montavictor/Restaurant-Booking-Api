@@ -3,9 +3,9 @@ FactoryBot.define do
     first_name { "John" }
     last_name { "Doe" }
     sequence(:email) { |n| "user#{n}@example.com" }
-    mobile_number { "12345678190" }
-    reservation_date { Date.tomorrow + 7.days }
-    meal_period { "dinner" }
+    mobile_number { "09345678901" }
+    sequence(:reservation_date) { |n| Date.today + 7.days + n }
+    meal_period { %w[lunch dinner].sample }
     number_of_guest { 12 }
     customer_notes { "Anniversary dinner" }
     first_course { "Salad" }
@@ -18,7 +18,7 @@ FactoryBot.define do
     eighth_course { "Soup" }
     ninth_course { "test" }
     status { "confirmed" }
-    cancellation_token { SecureRandom.hex(16) }
+    sequence(:cancellation_token) { SecureRandom.hex(16) }
     association :booking_date
 
     trait :cancelled do

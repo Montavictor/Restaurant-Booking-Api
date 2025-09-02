@@ -82,7 +82,7 @@ Rails.application.configure do
     user_name:       ENV["GMAIL_EMAIL"],
     password:        ENV["GMAIL_PASSWORD"],
     authentication:  'plain',
-    enable_starttls: true,
+    enable_starttls_auto: true,
     open_timeout:    5,
     read_timeout:    5 }
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
