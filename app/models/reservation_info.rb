@@ -11,7 +11,7 @@ class ReservationInfo < ApplicationRecord
   BASE_PRICE = 2_400
   MIN_DOWNPAYMENT = 10_000
   CANCEL_WINDOW_DAYS = 7
-  STATUSES = %w[pending confirmed cancelled].freeze
+  STATUSES = %w[confirmed cancelled].freeze
   MEAL_PERIODS = %w[lunch dinner].freeze
   
   # Validations
@@ -47,7 +47,6 @@ class ReservationInfo < ApplicationRecord
   # Scopes
   scope :confirmed, -> { where(status: 'confirmed') }
   scope :cancelled, -> { where(status: 'cancelled') }
-  scope :pending, -> { where(status: 'pending') }
   scope :for_date_and_period, ->(date, period) { 
     joins(:booking_date).where(booking_dates: { date: date }, meal_period: period) 
   }
@@ -72,9 +71,9 @@ class ReservationInfo < ApplicationRecord
   end
   
   def self.slot_taken?(booking_date, meal_period)
-    exists?(booking_date: booking_date, meal_period: meal_period, status: ['confirmed', 'pending'])
+    exists?(booking_date: booking_date, meal_period: meal_period, status: ['confirmed'])
   end
-  
+
   def self.calculate_amounts(guests, downpayment: nil)
     guests = guests.to_i
     return { error: "Invalid number of guests" } if guests < 12 || guests > 24
@@ -127,7 +126,7 @@ class ReservationInfo < ApplicationRecord
   
   def set_defaults
     self.price ||= BASE_PRICE
-    self.status ||= 'pending'
+    self.status ||= 'confirmed'
   end
   
   def normalize_data
@@ -150,7 +149,13 @@ class ReservationInfo < ApplicationRecord
     return unless reservation_date.present? && meal_period.present?
 
     booking_date = BookingDate.find_by(date: reservation_date)
-    if booking_date && ReservationInfo.slot_taken?(booking_date, meal_period)
+    return unless booking_date
+
+    if ReservationInfo.where(
+        booking_date: booking_date,
+        meal_period: meal_period,
+        status: ['confirmed'] 
+      ).exists?
       errors.add(:base, "The selected meal period is already booked for this date.")
     end
   end
