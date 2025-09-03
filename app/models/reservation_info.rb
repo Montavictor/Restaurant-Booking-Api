@@ -149,7 +149,8 @@ class ReservationInfo < ApplicationRecord
   def check_for_date_and_period
     return unless reservation_date.present? && meal_period.present?
 
-    if ReservationInfo.for_date_and_period(reservation_date, meal_period).exists?
+    booking_date = BookingDate.find_by(date: reservation_date)
+    if booking_date && ReservationInfo.slot_taken?(booking_date, meal_period)
       errors.add(:base, "The selected meal period is already booked for this date.")
     end
   end
