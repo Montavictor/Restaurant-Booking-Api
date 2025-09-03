@@ -108,7 +108,6 @@ class Api::V1::Versions::CoursesController < ApplicationController
     changes = parse_object_changes(version)
     return {} if changes.empty?
 
-    # Return only attribute names and change types for summary
     summary = {}
     changes.each do |attribute, values|
       next unless values.is_a?(Array) && values.length == 2
@@ -116,7 +115,9 @@ class Api::V1::Versions::CoursesController < ApplicationController
       
       summary[attribute] = {
         attribute_name: attribute.to_s.humanize,
-        change_type: determine_change_type(old_value, new_value)
+        change_type: determine_change_type(old_value, new_value),
+        old_value: format_value(old_value),
+        new_value: format_value(new_value)
       }
     end
     
