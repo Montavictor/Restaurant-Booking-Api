@@ -58,7 +58,7 @@ gem 'paper_trail'
 
 # Run against this stable release
 group :development, :test do
-  gem 'rspec-rails', '~> 8.0.0'
+  gem 'rspec-rails', '~> 8.0.2'
 end
 group :development, :test do
   gem 'factory_bot_rails'
