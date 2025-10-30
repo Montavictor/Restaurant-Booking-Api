@@ -343,7 +343,7 @@ GEM
       globalid (>= 1.0.1)
       sidekiq (>= 6.5.0)
     stringio (3.1.7)
-    stripe (15.4.0)
+    stripe (17.1.0)
     thor (1.4.0)
     tilt (2.6.1)
     timeout (0.4.3)
@@ -398,7 +398,7 @@ DEPENDENCIES
   sidekiq
   sidekiq-cron
   sinatra!
-  stripe (~> 15.3)
+  stripe (~> 17.1)
   tzinfo-data
 
 BUNDLED WITH
